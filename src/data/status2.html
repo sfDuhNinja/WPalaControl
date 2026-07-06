@@ -44,12 +44,8 @@
     });
 
     onSectionOpen('Status', async function () {
-        // Module/hardware + Home Automation connectivity info
+        // Home Automation connectivity info
         getJSON("/gs" + qsp[8], function (GS) {
-            // Written into status0's "Module" kvGrid (not scoped by qsp): hardware
-            // revision is module/device info, not Wi-Fi or stove-specific.
-            const hwEl = $('#sysHwVersion');
-            if (hwEl) hwEl.textContent = GS.hwversion + (GS.hwdetection || '');
             WPC.setHaStatus({ protocol: GS.haprotocol, mqttStatus: GS.hamqttstatus });
         });
 

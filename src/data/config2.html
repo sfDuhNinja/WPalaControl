@@ -1,15 +1,5 @@
 <form id="appForm">
     <div class="hairlineTop">
-        <div class="subhead">Module</div>
-        <label class="formLabel" for="hwdetection">Hardware detection</label>
-        <select id="hwdetection" name="hwdetection" class="field">
-            <option value="0">Auto</option>
-            <option value="1">V1.x (forced)</option>
-            <option value="2">V2.x (forced)</option>
-        </select>
-    </div>
-
-    <div class="hairlineTop">
         <div class="subhead">Home automation</div>
 
         <div class="segmented">
@@ -114,7 +104,6 @@
     onSectionOpen('Config', function () {
         getJSON('/gc' + qsp[8],
             function (GC) {
-                $(qsp + '#hwdetection').value = GC.hwdetection;
                 setHaProto(GC.haproto);
                 $(qsp + '#hahost').value = GC.hahost;
                 $(qsp + '#hamport').value = GC.hamport;

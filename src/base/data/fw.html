@@ -152,12 +152,8 @@
         const model = document.querySelector("meta[name='description']").content;
         const esp32 = '(\\.esp32)?';
         const ver = '(\\.\\d+\\.\\d+\\.\\d+)?';
-        const p1 = new RegExp(`^${model}${esp32}${ver}.*\\.bin$`, 'i');
-        let p2 = null;
-        if (model.startsWith('W')) {
-            p2 = new RegExp(`^Wireless${model.substring(1)}${esp32}${ver}.*\\.bin$`, 'i');
-        }
-        return p1.test(filename) || (p2 && p2.test(filename));
+        const p = new RegExp(`^${model}${esp32}${ver}.*\\.bin$`, 'i');
+        return p.test(filename);
     }
 
     function uploadFirmware(file) {
