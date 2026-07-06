@@ -8,7 +8,7 @@
 #define TOSTRING(x) STRINGIFY(x)
 
 // ----- Should be modified for your application -----
-#define CUSTOM_APP_MANUFACTURER "Domochip"
+#define CUSTOM_APP_MANUFACTURER "sfDuhNinja" // fork of Domochip/WPalaControl - only affects OTA/release URLs and the HA "manufacturer" field
 #define CUSTOM_APP_MODEL "WPalaControl"
 #define CUSTOM_APP_CLASS WPalaControl
 #define VERSION_NUMBER "3.7.3"

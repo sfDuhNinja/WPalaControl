@@ -1,5 +1,0 @@
-(sym_lib_table
-  (version 7)
-  (lib (name "si8621")(type "KiCad")(uri "${KIPRJMOD}/lib/si8621.kicad_sym")(options "")(descr ""))
-  (lib (name "wemos_mini")(type "KiCad")(uri "${KIPRJMOD}/lib/wemos_mini.kicad_sym")(options "")(descr ""))
-)
