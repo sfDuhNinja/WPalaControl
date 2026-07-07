@@ -44,8 +44,11 @@ int WPalaControl::mySelectSerial(unsigned long timeout)
 {
   size_t avail;
   unsigned long startmillis = millis();
+  // yield() lets the WiFi/lwIP stack run and feeds the software watchdog - without it,
+  // a slow/unresponsive stove can busy-wait long enough (timeout up to 2300ms, called
+  // repeatedly per byte) to trip the ESP8266 Soft WDT.
   while ((avail = PALA_SERIAL.available()) == 0 && (millis() - startmillis) < timeout)
-    ;
+    yield();
 
   return avail;
 }
