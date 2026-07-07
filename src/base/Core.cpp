@@ -139,10 +139,18 @@ void Core::appInitWebServer(WebServer &server)
         // Define the progress callback function
         std::function<void(size_t, size_t)> progressCallback = [&server](size_t progress, size_t total)
         {
-          uint8_t percent = (progress * 100) / total;
-          LOG_SERIAL_PRINTF_P(PSTR("Progress: %d%%\n"), percent);
           char pct[10];
-          snprintf_P(pct, sizeof(pct), PSTR("p:%d\n"), percent);
+          // total is (size_t)-1 (UINT32_MAX) when the download's Content-Length was unknown -
+          // dividing by it would silently render as "stuck at 0%" for the whole transfer
+          // instead of an honest "we don't know" indicator.
+          if (total == 0 || total == (size_t)-1)
+            snprintf_P(pct, sizeof(pct), PSTR("p:?\n"));
+          else
+          {
+            uint8_t percent = (progress * 100) / total;
+            LOG_SERIAL_PRINTF_P(PSTR("Progress: %d%%\n"), percent);
+            snprintf_P(pct, sizeof(pct), PSTR("p:%d\n"), percent);
+          }
           server.sendContent(pct);
         };
 

@@ -5,16 +5,11 @@
     <div class="kvRow"><span>Uptime</span><span class="mono" id="sysUptime">—</span></div>
     <div class="kvRow"><span>Free heap</span><span class="mono" id="sysFreeheap">—</span></div>
 </div>
-<div id="crashRow" style="display:none; align-items:center; justify-content:space-between; margin-top:10px; font-size:13px;">
-    <span style="color:var(--text-dim);">Crash logs (<span id="crashCount">0</span>)</span>
-    <span style="display:flex; gap:8px;">
-        <a href="/crashdl" class="btnGhost" style="text-decoration:none; display:inline-block;">Download</a>
-        <button class="btnDanger" id="crashClrBtn">Clear</button>
-    </span>
-</div>
 
 <script>
     // qsp is substituted at build time by pio_pre_build_spa.py
+    // Crash logs are surfaced via the top-level banner (see index_template.html WPC.setCrashInfo)
+    // instead of a row here, so there's nothing left to wire up for them in this fragment.
 
     onSectionOpen('Status', function () {
         getJSON("/gs" + qsp[8], function (GS) {
@@ -24,19 +19,7 @@
             $(qsp + '#sysFreeheap').textContent = GS.freeheap;
 
             WPC.setSystem({ sn: GS.sn, version: GS.version, uptime: GS.uptime, freeheap: GS.freeheap });
-
-            if (GS.crashcount > 0) {
-                $(qsp + '#crashCount').textContent = GS.crashcount;
-                $(qsp + '#crashRow').style.display = 'flex';
-            }
             WPC.setCrashInfo(GS.crashcount);
         });
-    });
-
-    $(qsp + '#crashClrBtn').addEventListener('click', function () {
-        post('/crashclr', null, function () {
-            $(qsp + '#crashRow').style.display = 'none';
-            WPC.setCrashInfo(0);
-        }, function () { alert('Failed to clear crashes'); });
     });
 </script>

@@ -136,9 +136,18 @@
                     chunkAccumulator = chunks.pop();
                     chunks.forEach(function (chunk) {
                         if (chunk.startsWith('p:')) {
-                            const pct = parseInt(chunk.substring(2));
-                            $('#fwProgressPct').textContent = pct + '%';
-                            $('#fwProgressFill').style.width = pct + '%';
+                            const raw = chunk.substring(2);
+                            const fill = $('#fwProgressFill');
+                            if (raw === '?') {
+                                // download's Content-Length was unknown - can't show a real percentage
+                                $('#fwProgressPct').textContent = 'Installing…';
+                                fill.classList.add('indeterminate');
+                            } else {
+                                fill.classList.remove('indeterminate');
+                                const pct = parseInt(raw);
+                                $('#fwProgressPct').textContent = pct + '%';
+                                fill.style.width = pct + '%';
+                            }
                         }
                         else if (chunk.startsWith('s:')) success = chunk.substring(2) === 'true';
                         else if (chunk.startsWith('m:')) message = chunk.substring(2);

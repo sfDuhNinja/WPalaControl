@@ -789,6 +789,23 @@
             transition: width .2s;
         }
 
+        .progressFill.indeterminate {
+            width: 100% !important;
+            animation: pulseFill 1.2s ease-in-out infinite;
+        }
+
+        @keyframes pulseFill {
+
+            0%,
+            100% {
+                opacity: .35;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
         .dropzone {
             border: 1.5px dashed var(--border);
             border-radius: 10px;
@@ -1272,9 +1289,6 @@
             btn.disabled = true;
             post('/crashclr', null, function () {
                 WPC.setCrashInfo(0);
-                // keep the Status-details row (mounted separately) in sync
-                const row = $('#crashRow');
-                if (row) row.style.display = 'none';
                 btn.disabled = false;
             }, function () {
                 alert('Failed to clear crash logs');
