@@ -431,12 +431,22 @@
             align-items: center;
             justify-content: space-between;
             padding: 12px 20px;
+            margin: 0;
             border: none;
             background: none;
             cursor: pointer;
             text-align: left;
             color: var(--text);
+            font: inherit;
             line-height: 1;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+
+        .accHeader svg {
+            display: block;
+            flex-shrink: 0;
         }
 
         .accHeader-left {
