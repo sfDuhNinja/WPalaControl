@@ -11,7 +11,7 @@
 #define CUSTOM_APP_MANUFACTURER "sfDuhNinja" // fork of Domochip/WPalaControl - only affects OTA/release URLs and the HA "manufacturer" field
 #define CUSTOM_APP_MODEL "FerControl" // this fork's own name (distinct from upstream WPalaControl), also the GitHub repo name
 #define CUSTOM_APP_CLASS WPalaControl
-#define VERSION_NUMBER "0.3.2"
+#define VERSION_NUMBER "0.3.3"
 
 #define CUSTOM_APP_HEADER TOSTRING(CUSTOM_APP_CLASS.h) // calculated header file "{CUSTOM_APP_CLASS}.h"
 #define DEFAULT_AP_SSID CUSTOM_APP_MODEL               // Default Access Point SSID "{CUSTOM_APP_MODEL}"

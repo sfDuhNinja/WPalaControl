@@ -3,6 +3,13 @@
 
 #ifdef ESP8266
 
+// Populated by the core's malloc wrappers (heap.cpp) whenever an allocation fails -
+// lets a crash log say exactly which call site ran out of (contiguous) heap.
+extern void *umm_last_fail_alloc_addr;
+extern int umm_last_fail_alloc_size;
+extern const char *umm_last_fail_alloc_file;
+extern int umm_last_fail_alloc_line;
+
 extern "C" void custom_crash_callback(struct rst_info *rst_info, uint32_t stack, uint32_t stack_end)
 {
     // avoid to log a crash during Update reboot
@@ -57,9 +64,21 @@ extern "C" void custom_crash_callback(struct rst_info *rst_info, uint32_t stack,
 
     // log crash info (epc1, epc2, epc3, excvaddr, depc) and stack trace
     // 83 chars of epc1, epc2, epc3, excvaddr, depc info + 13 chars of >stack>
-    sprintf_P(tmpBuffer, PSTR("epc1=0x%08x epc2=0x%08x epc3=0x%08x excvaddr=0x%08x depc=0x%08x\n>>>stack>>>\n"),
+    sprintf_P(tmpBuffer, PSTR("epc1=0x%08x epc2=0x%08x epc3=0x%08x excvaddr=0x%08x depc=0x%08x\n"),
               rst_info->epc1, rst_info->epc2, rst_info->epc3, rst_info->excvaddr, rst_info->depc);
     logFile.write(tmpBuffer, strlen(tmpBuffer));
+
+    // if the crash was (or involved) a failed allocation, record where it happened
+    if (umm_last_fail_alloc_addr)
+    {
+        writtenLen = snprintf_P(tmpBuffer, sizeof(tmpBuffer), PSTR("Last failed alloc: %d bytes, caller 0x%08x (%s:%d)\n"),
+                                 umm_last_fail_alloc_size, (uint32_t)umm_last_fail_alloc_addr,
+                                 umm_last_fail_alloc_file ? umm_last_fail_alloc_file : "?", umm_last_fail_alloc_line);
+        if (writtenLen > 0)
+            logFile.write(tmpBuffer, writtenLen);
+    }
+
+    logFile.write(">>>stack>>>\n", 12);
 
     uint16_t stackLength = stack_end - stack;
 

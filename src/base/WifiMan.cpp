@@ -59,6 +59,14 @@ void WifiMan::refreshWiFi()
       LOG_SERIAL_PRINT(F("Connect"));
 
       WiFi.config(ip, gw, mask, dns1, dns2);
+#ifdef ESP8266
+      // Modem sleep's beacon-interval wake/sleep cycling has been observed to crash inside
+      // Espressif's closed-source WiFi stack (ieee80211/sta_input beacon parsing) under the
+      // sustained radio load of a firmware download. Keep the radio fully awake instead.
+      WiFi.setSleepMode(WIFI_NONE_SLEEP);
+#else
+      WiFi.setSleep(false);
+#endif
       WiFi.begin(ssid, password);
 
       // Wait _reconnectDuration for connection
