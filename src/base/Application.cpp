@@ -277,10 +277,31 @@ bool Application::getLatestUpdateInfo(char *version, char *title /* = nullptr */
     while (readNextChar(c) && c != '"')
       ;
 
-    // for title, skip version prefix up to first space
+    // for title, skip a "X.Y.Z " version prefix up to the first space - but only if
+    // one is actually present before the closing quote. A release named just the bare
+    // version (e.g. "0.2.0", no space at all) would otherwise make this run past the
+    // end of the string looking for a space that only shows up later, inside an
+    // unrelated field further down the JSON stream.
     if (targetPtr == title)
-      while (readNextChar(c) && c != ' ')
-        ;
+    {
+      while (readNextChar(c) && c != '"' && curLen < targetMaxLen)
+      {
+        if (c == ' ')
+        {
+          // prefix found: discard it, the loop below captures what follows
+          curLen = 0;
+          targetPtr[0] = '\0';
+          break;
+        }
+        targetPtr[curLen++] = c;
+        targetPtr[curLen] = '\0';
+      }
+
+      // reached the closing quote before any space: the whole value (already
+      // captured above) is the title as-is, nothing left to read for this key
+      if (c == '"')
+        continue;
+    }
 
     // read the value
     while (readNextChar(c))
