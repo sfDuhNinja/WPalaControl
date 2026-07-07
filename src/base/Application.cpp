@@ -149,6 +149,13 @@ bool Application::getLatestUpdateInfo(char *version, char *title /* = nullptr */
   HTTPClient http;
 
   clientSecure.setInsecure();
+#ifdef ESP8266
+  // Default BearSSL RX/TX buffers are 16KB each - on an ~80KB-RAM board that alone can
+  // starve the rest of the app. GitHub's API honors MFLN, so ask it to cap TLS records
+  // at 1KB/0.5KB; if unsupported the handshake/transfer just fails cleanly (existing
+  // httpCode/error handling), which beats an out-of-memory crash.
+  clientSecure.setBufferSizes(1024, 512);
+#endif
   http.begin(clientSecure, String(F("https://api.github.com/repos/" CUSTOM_APP_MANUFACTURER "/" CUSTOM_APP_MODEL "/releases/latest")));
 
 #ifdef ESP8266
@@ -392,6 +399,12 @@ bool Application::updateFirmware(const char *version, String &retMsg, std::funct
 
   WiFiClientSecure clientSecure;
   clientSecure.setInsecure();
+#ifdef ESP8266
+  // Same rationale as getLatestUpdateInfo(): shrink BearSSL's buffers via MFLN so the TLS
+  // download doesn't compete with Update's flash-write buffer and the rest of the app for
+  // an already-tight ~80KB of RAM. GitHub's release CDN honors MFLN.
+  clientSecure.setBufferSizes(1024, 512);
+#endif
 
   char fwUrl[200];
 #ifdef ESP8266
