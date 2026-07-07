@@ -2111,15 +2111,18 @@ Palazzetti::CommandResult WPalaControl::executePalaCmdExt(const String &cmd, Jso
 
     // the third parameter was designed for Micronova MB and is not used in Fumis board
 
-    uint16_t ADDR_DATA;
-    cmdSuccess = _Pala.readData(cmdParams[0], cmdParams[1], &ADDR_DATA);
-
-    if (cmdSuccess == Palazzetti::CommandResult::OK)
+    if (info["MSG"].isNull())
     {
-      String addrName(F("ADDR_"));
-      // append the first parameter as hex string
-      addrName += String(cmdParams[0], HEX);
-      data[addrName] = ADDR_DATA;
+      uint16_t ADDR_DATA;
+      cmdSuccess = _Pala.readData(cmdParams[0], cmdParams[1], &ADDR_DATA);
+
+      if (cmdSuccess == Palazzetti::CommandResult::OK)
+      {
+        String addrName(F("ADDR_"));
+        // append the first parameter as hex string
+        addrName += String(cmdParams[0], HEX);
+        data[addrName] = ADDR_DATA;
+      }
     }
   }
 #if DEVELOPPER_MODE
