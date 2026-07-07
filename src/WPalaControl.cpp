@@ -312,12 +312,16 @@ bool WPalaControl::mqttPublishHassDiscovery()
   uniqueIdPrefixStove += staticData.SN;
 
   // prepare Stove device JSON
+  // manufacturer/model are hardcoded for this exact stove: the Fumis Alpha board's own MOD
+  // register reads back as 0 (never populated by this OEM firmware, same as VER/CORE/FWDATE
+  // below), so there's no real value to report here.
   deserializeJson(json, F("{"
                           "\"configuration_url\":\"http://fercontrol.local\","
+                          "\"manufacturer\":\"Ferroli\","
+                          "\"model\":\"BioPellet Tech 30\","
                           "\"name\":\"Stove\""
                           "}"));
   json[F("identifiers")][0] = uniqueIdPrefixStove;
-  json[F("model")] = String(staticData.MOD);
   // Not reported by this stove (reads back as 0) - omit rather than show garbage "0 (0-00-00)".
   if (staticData.VER != 0)
     json[F("sw_version")] = String(staticData.VER) + F(" (") + staticData.FWDATE + ')';
