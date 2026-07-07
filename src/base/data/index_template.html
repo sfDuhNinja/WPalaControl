@@ -479,6 +479,12 @@
         .accBodyInner {
             min-height: 0;
             overflow: hidden;
+            padding: 0 20px;
+        }
+
+        /* Vertical padding only applies when open - it's what was keeping the closed
+           accBody from collapsing to 0 (a box's padding still counts even at 0fr/min-height:0). */
+        .accBody.open .accBodyInner {
             padding: 4px 20px 22px;
         }
 

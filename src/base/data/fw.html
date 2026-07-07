@@ -75,11 +75,15 @@
         // Release notes are plain GitHub-flavored markdown; this renders every non-empty
         // line as one flat bullet, so strip markdown list markers and bold markers to avoid
         // a doubled "• - " look and stray "**" characters.
+        const escapeHtml = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         const summaryLines = (fwState.summary || '')
             .split(/\r\n|\n/)
             .map(l => l.trim().replace(/^[-*]\s+/, '').replace(/\*\*/g, ''))
             .filter(Boolean);
-        $('#fwSummary').innerHTML = summaryLines.map(l => '<li>' + l + '</li>').join('');
+        // notes text is untrusted-ish (it's whatever the release body says) - escape before
+        // innerHTML, otherwise a literal "<tag>" in the text (e.g. describing an HTML element)
+        // gets parsed as real markup instead of shown as text.
+        $('#fwSummary').innerHTML = summaryLines.map(l => '<li>' + escapeHtml(l) + '</li>').join('');
         const link = $('#fwReleaseUrl');
         if (fwState.releaseUrl) { link.href = fwState.releaseUrl; link.style.display = 'inline-block'; }
         else link.style.display = 'none';
