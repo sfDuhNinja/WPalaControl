@@ -1,4 +1,7 @@
 #include "Application.h"
+#ifdef ESP8266
+#include <ESP8266mDNS.h>
+#endif
 
 Application *Application::_applicationList[3] = {nullptr, nullptr, nullptr};
 
@@ -407,14 +410,17 @@ bool Application::updateFirmware(const char *version, String &retMsg, std::funct
   WiFiClientSecure clientSecure;
   clientSecure.setInsecure();
 #ifdef ESP8266
-  // Same rationale as getLatestUpdateInfo(): shrink BearSSL's buffers via MFLN so the TLS
-  // download doesn't compete with Update's flash-write buffer and the rest of the app for
-  // an already-tight ~80KB of RAM. Unlike the small metadata GET, the actual asset download
-  // (redirected to GitHub's release CDN) doesn't reliably honor a 1KB receive buffer - a
-  // record that doesn't fit silently drops the connection, which used to crash on the null
-  // stream pointer below instead of failing cleanly. 4KB matches Update's own flash-sector
-  // write size and has held up against the CDN in testing.
-  clientSecure.setBufferSizes(4096, 512);
+  // Tried shrinking BearSSL's RX buffer via MFLN (down to 1KB, then 4KB) to save RAM, but
+  // live testing showed GitHub's release CDN doesn't honor the MFLN extension at all
+  // (clientSecure.getMFLNStatus() came back false): it keeps sending up to full 16KB TLS
+  // records regardless of what we ask for. A record bigger than our buffer doesn't error
+  // out - the connection just silently stops delivering any more bytes, which is why the
+  // download would stall at a different (small) percentage every time. So the receive
+  // buffer has to be the real 16KB max; free up room for it by dropping mDNS for the
+  // duration of the download (it's what starved out and crashed the device when this was
+  // tried previously - see MDNS.close()/re-begin around the download below).
+  clientSecure.setBufferSizes(16384, 512);
+  MDNS.close();
 #endif
 
   char fwUrl[200];
@@ -442,6 +448,9 @@ bool Application::updateFirmware(const char *version, String &retMsg, std::funct
   if (httpCode != 200)
   {
     https.end();
+#ifdef ESP8266
+    MDNS.begin(CUSTOM_APP_MODEL);
+#endif
 
     char retMsgBuf[48];
     snprintf_P(retMsgBuf, sizeof(retMsgBuf), PSTR("Failed to download file, httpCode: %d"), httpCode);
@@ -461,6 +470,9 @@ bool Application::updateFirmware(const char *version, String &retMsg, std::funct
     // connection dropped between the header response and here (e.g. a TLS record that didn't
     // fit the buffer above) - fail cleanly instead of null-dereferencing it below
     https.end();
+#ifdef ESP8266
+    MDNS.begin(CUSTOM_APP_MODEL);
+#endif
     retMsg = F("Lost connection before download could start");
     LOG_SERIAL_PRINTLN(retMsg);
     return false;
@@ -487,6 +499,11 @@ bool Application::updateFirmware(const char *version, String &retMsg, std::funct
   Update.end();
 
   https.end();
+#ifdef ESP8266
+  // Restore mDNS regardless of outcome - on success the device reboots shortly after anyway,
+  // but on failure it keeps running and .local resolution needs to keep working.
+  MDNS.begin(CUSTOM_APP_MODEL);
+#endif
 
   bool success = !Update.hasError();
   if (success)
