@@ -17,21 +17,23 @@
     // executePalaCmdGet). HPAR/PARM are the only two that take a parameter, handled
     // separately below with their own inline input.
     const DEBUG_CMDS = [
-        ['GET ALLS', 'Toate datele live'],
-        ['GET CHRD', 'Program chrono'],
-        ['GET CNTR', 'Contoare (aprinderi, timpi, erori)'],
-        ['GET DPRS', 'Presiune diferențială'],
-        ['GET FAND', 'Ventilatoare'],
-        ['GET IOPT', 'Intrări/ieșiri digitale'],
-        ['GET LABL', 'Eticheta dispozitivului'],
-        ['GET MDVE', 'Model/versiune/dată firmware placă'],
-        ['GET SETP', 'Setpoint și mod eco'],
-        ['GET STAT', 'Status curent'],
-        ['GET STDT', 'Date statice complete'],
-        ['GET TIME', 'Ora centralei'],
-        ['GET TMPS', 'Temperaturi T1-T5'],
-        ['GET POWR', 'Putere și feeder'],
-        ['GET SERN', 'Serie centrală'],
+        ['GET ALLS', 'All live data'],
+        ['GET CHRD', 'Chrono schedule'],
+        ['GET CNTR', 'Counters (ignitions, times, errors)'],
+        ['GET DPRS', 'Differential pressure'],
+        ['GET FAND', 'Fans'],
+        ['GET IOPT', 'Digital inputs/outputs'],
+        ['GET LABL', 'Device label'],
+        ['GET MDVE', 'Board model/firmware/date'],
+        ['GET SETP', 'Setpoint and eco mode'],
+        ['GET STAT', 'Current status'],
+        ['GET STDT', 'Full static data'],
+        ['GET TIME', 'Stove clock'],
+        ['GET TMPS', 'Temperatures T1-T5'],
+        ['GET POWR', 'Power level and feeder'],
+        ['GET SERN', 'Stove serial number'],
+        ['BKP PARM JSON', 'All normal parameters'],
+        ['BKP HPAR JSON', 'All hidden parameters'],
     ];
 
     let debugBusy = false;
@@ -82,8 +84,8 @@
             btn.addEventListener('click', function () { debugRun(cmd); });
             list.appendChild(btn);
         });
-        list.appendChild(debugParamRow('GET HPAR', 'GET HPAR', 'Parametru ascuns după index'));
-        list.appendChild(debugParamRow('GET PARM', 'GET PARM', 'Parametru după index'));
+        list.appendChild(debugParamRow('GET HPAR', 'GET HPAR', 'Hidden parameter by index'));
+        list.appendChild(debugParamRow('GET PARM', 'GET PARM', 'Parameter by index'));
     }
 
     $('#debugClearBtn').addEventListener('click', function () {
