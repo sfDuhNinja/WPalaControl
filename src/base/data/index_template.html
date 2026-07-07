@@ -585,7 +585,6 @@
         .rawGrid {
             min-height: 0;
             overflow: hidden;
-            margin-top: 14px;
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 2px 18px;
@@ -593,6 +592,12 @@
             font-size: 12px;
             background: var(--input-bg);
             border-radius: 10px;
+        }
+
+        /* margin/padding only while open - unconditional would keep the closed .rawWrap from
+           collapsing to 0 (same fix as .accBodyInner above). */
+        .rawWrap.open .rawGrid {
+            margin-top: 14px;
             padding: 12px 14px;
         }
 
