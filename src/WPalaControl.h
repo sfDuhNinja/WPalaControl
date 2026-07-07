@@ -56,6 +56,7 @@ private:
 
   Palazzetti _Pala;
   unsigned long _lastAllStatusRefreshMillis = 0;
+  uint8_t _lastKnownBECO = 0; // last BECO read from the stove, used to eco-adjust SETP echoed by SET SETP* commands
 
   bool _needPublish = false;
   Ticker _publishTicker;

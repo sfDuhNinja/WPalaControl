@@ -6,6 +6,15 @@
 #define PALA_SERIAL Serial2
 #endif
 
+// When Eco mode (BECO) is active, this stove's panel displays a target 3°C below
+// the raw SETP register. Apply the same offset everywhere SETP is exposed (web/MQTT).
+static constexpr float ECO_SETPOINT_OFFSET = 3.0f;
+
+static float ecoAdjustedSetpoint(float setp, uint8_t beco)
+{
+  return beco ? setp - ECO_SETPOINT_OFFSET : setp;
+}
+
 // Serial management functions -------------
 int WPalaControl::myOpenSerial(uint32_t baudrate)
 {
@@ -1190,7 +1199,8 @@ Palazzetti::CommandResult WPalaControl::executePalaCmdGet(const String &cmd, Jso
       data["FSTATUS"] = allStatusData.FSTATUS;
       if (allStatusData.isMFSTATUSValid)
         data["MFSTATUS"] = allStatusData.MFSTATUS;
-      addFloat(data, "SETP", allStatusData.SETP);
+      _lastKnownBECO = allStatusData.BECO;
+      addFloat(data, "SETP", ecoAdjustedSetpoint(allStatusData.SETP, allStatusData.BECO));
       data["PUMP"] = allStatusData.PUMP;
       data["PQT"] = allStatusData.PQT;
       data["F1V"] = allStatusData.F1V;
@@ -1447,7 +1457,8 @@ Palazzetti::CommandResult WPalaControl::executePalaCmdGet(const String &cmd, Jso
 
     if (cmdSuccess == Palazzetti::CommandResult::OK)
     {
-      addFloat(data, "SETP", setPointData.SETP);
+      _lastKnownBECO = setPointData.BECO;
+      addFloat(data, "SETP", ecoAdjustedSetpoint(setPointData.SETP, setPointData.BECO));
       addFloat(data, "SECO", setPointData.SECO);
       data["BECO"] = setPointData.BECO;
     }
@@ -1960,7 +1971,7 @@ Palazzetti::CommandResult WPalaControl::executePalaCmdSet(const String &cmd, Jso
       cmdSuccess = _Pala.setSetpoint((uint8_t)cmdParams[0], &SETPResult);
 
       if (cmdSuccess == Palazzetti::CommandResult::OK)
-        addFloat(data, "SETP", SETPResult);
+        addFloat(data, "SETP", ecoAdjustedSetpoint(SETPResult, _lastKnownBECO));
     }
   }
   else if (cmd.startsWith(F("SET SLNT ")))
@@ -1996,7 +2007,7 @@ Palazzetti::CommandResult WPalaControl::executePalaCmdSet(const String &cmd, Jso
     cmdSuccess = _Pala.setSetPointDown(&SETPResult);
 
     if (cmdSuccess == Palazzetti::CommandResult::OK)
-      addFloat(data, "SETP", SETPResult);
+      addFloat(data, "SETP", ecoAdjustedSetpoint(SETPResult, _lastKnownBECO));
   }
   else if (cmd.startsWith(F("SET STPF ")))
   {
@@ -2023,7 +2034,7 @@ Palazzetti::CommandResult WPalaControl::executePalaCmdSet(const String &cmd, Jso
       cmdSuccess = _Pala.setSetpoint(setPointFloat, &SETPResult);
 
       if (cmdSuccess == Palazzetti::CommandResult::OK)
-        addFloat(data, "SETP", SETPResult);
+        addFloat(data, "SETP", ecoAdjustedSetpoint(SETPResult, _lastKnownBECO));
     }
   }
   else if (cmd == F("SET STPU"))
@@ -2035,7 +2046,7 @@ Palazzetti::CommandResult WPalaControl::executePalaCmdSet(const String &cmd, Jso
     cmdSuccess = _Pala.setSetPointUp(&SETPResult);
 
     if (cmdSuccess == Palazzetti::CommandResult::OK)
-      addFloat(data, "SETP", SETPResult);
+      addFloat(data, "SETP", ecoAdjustedSetpoint(SETPResult, _lastKnownBECO));
   }
   else if (cmd.startsWith(F("SET TIME ")))
   {
