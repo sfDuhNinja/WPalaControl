@@ -672,13 +672,19 @@
             opacity: 1;
         }
 
-        /* Multi-column (not grid) so entries read top-to-bottom down the left column first,
-           then continue in the right column - instead of a row-major left/right zig-zag. */
+        /* Column-major order (down the left column first, then the right) via an explicit grid:
+           grid-auto-flow:column fills each column top-to-bottom, and --raw-rows (set from JS to
+           ceil(count/2)) fixes how many rows a column holds. Deliberately a grid, not CSS
+           multi-column: multi-column needs a definite height to balance, which fights the
+           0fr->1fr collapse wrapper and renders inconsistently across browsers. */
         .rawGrid {
             min-height: 0;
             overflow: hidden;
-            columns: 2;
-            column-gap: 18px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: repeat(var(--raw-rows, 1), auto);
+            grid-auto-flow: column;
+            gap: 2px 18px;
             font-family: ui-monospace, SFMono-Regular, 'SF Mono', Consolas, 'Liberation Mono', monospace;
             font-size: 12px;
             background: var(--input-bg);
@@ -694,7 +700,9 @@
 
         @media (max-width: 480px) {
             .rawGrid {
-                columns: 1;
+                grid-template-columns: 1fr;
+                grid-template-rows: auto;
+                grid-auto-flow: row;
             }
         }
 
@@ -703,7 +711,6 @@
             justify-content: space-between;
             padding: 4px 0;
             border-bottom: 1px solid var(--border);
-            break-inside: avoid;
         }
 
         .rawRow>span:first-child {

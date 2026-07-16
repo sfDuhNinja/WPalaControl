@@ -15,10 +15,14 @@
     let rawOpen = false;
 
     function renderRawGrid() {
-        const rows = Object.keys(raw).map(function (k) {
+        const keys = Object.keys(raw);
+        const rows = keys.map(function (k) {
             return '<div class="rawRow"><span>' + k + '</span><span>' + raw[k] + '</span></div>';
         }).join('');
-        $(qsp + '#rawGrid').innerHTML = rows;
+        const grid = $(qsp + '#rawGrid');
+        // Rows per column so grid-auto-flow:column fills the left column fully before the right.
+        grid.style.setProperty('--raw-rows', Math.ceil(keys.length / 2));
+        grid.innerHTML = rows;
     }
 
     function mergeRaw(partial) {
